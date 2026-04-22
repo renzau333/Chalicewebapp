@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exponential Chalice Volume App</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root { --bg: #0f172a; --card: #1e293b; --accent: #38bdf8; --text: #f1f5f9; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); color: var(--text); display: flex; flex-direction: column; align-items: center; padding: 20px; margin: 0; }
+        .container { background: var(--card); padding: 2rem; border-radius: 1.5rem; box-shadow: 0 10px 25px rgba(0,0,0,0.5); width: 100%; max-width: 400px; border: 1px solid #334155; }
+        h2 { text-align: center; color: var(--accent); margin: 0; font-size: 1.1rem; text-transform: uppercase; letter-spacing: 2px; }
+        p.subtitle { text-align: center; font-size: 0.8rem; color: #94a3b8; margin-bottom: 1.5rem; }
+        .formula-box { background: #0f172a; padding: 10px; border-radius: 8px; text-align: center; margin-bottom: 1.5rem; border-left: 4px solid var(--accent); }
+        .formula-box code { color: #f472b6; font-size: 0.9rem; }
+        .input-group { margin-bottom: 1rem; }
+        label { display: block; font-size: 0.75rem; margin-bottom: 0.4rem; color: #94a3b8; font-weight: bold; }
+        input { width: 100%; padding: 0.8rem; background: #0f172a; border: 1px solid #334155; border-radius: 0.5rem; color: white; outline: none; box-sizing: border-box; transition: 0.3s; }
+        input:focus { border-color: var(--accent); box-shadow: 0 0 8px rgba(56, 189, 248, 0.3); }
+        button { width: 100%; padding: 1rem; background: var(--accent); color: #0f172a; border: none; border-radius: 0.5rem; font-weight: 800; cursor: pointer; transition: 0.3s; margin-top: 1rem; text-transform: uppercase; }
+        button:hover { opacity: 0.9; transform: scale(1.02); }
+        #result { margin-top: 1.5rem; text-align: center; font-size: 1.2rem; font-weight: bold; border-top: 1px solid #334155; padding-top: 1rem; color: #fbbf24; }
+        canvas { margin-top: 1.5rem; max-width: 100%; background: #1e293b; border-radius: 1rem; padding: 10px; border: 1px solid #334155; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Exponential Chalice</h2>
+    <p class="subtitle">Solid of Revolution Calculator</p>
+    
+    <div class="formula-box">
+        <label>Current Function:</label>
+        <code>f(x) = e^(0.5x)</code>
+    </div>
+
+    <div class="input-group">
+        <label>Start Height (a)</label>
+        <input type="number" id="a" value="0">
+    </div>
+    <div class="input-group">
+        <label>End Height (b)</label>
+        <input type="number" id="b" value="4">
+    </div>
+    
+    <button onclick="calculate()">Compute Volume</button>
+    
+    <div id="result">---</div>
+</div>
+
+<canvas id="myChart"></canvas>
+
+<script>
+    let chart;
+
+    function calculate() {
+        const a = parseFloat(document.getElementById('a').value);
+        const b = parseFloat(document.getElementById('b').value);
+        const n = 1000;
+        const dx = (b - a) / n;
+        let v = 0;
+        
+        const labels = [];
+        const dataPoints = [];
+
+        for (let i = 0; i <= n; i++) {
+            let x = a + (i * dx);
+            // Heto yung radius based sa Chalice function mo
+            let r = Math.exp(0.5 * x); 
+            
+            if (i < n) {
+                // Disk Method Formula: PI * r^2 * dx
+                v += Math.PI * Math.pow(r, 2) * dx;
+            }
+            
+            if (i % 25 === 0) {
+                labels.push(x.toFixed(1));
+                dataPoints.push(r.toFixed(2));
+            }
+        }
+
+        document.getElementById('result').innerHTML = `Volume: ${v.toFixed(4)} u³`;
+        updateChart(labels, dataPoints);
+    }
+
+    function updateChart(labels, data) {
+        const ctx = document.getElementById('myChart').getContext('2d');
+        if (chart) chart.destroy();
+        
+        chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Radius: f(x) = e^(0.5x)',
+                    data: data,
+                    borderColor: '#38bdf8',
+                    backgroundColor: 'rgba(56, 189, 248, 0.1)',
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    x: { ticks: { color: '#94a3b8' }, title: { display: true, text: 'Height (x)', color: '#64748b' } },
+                    y: { ticks: { color: '#94a3b8' }, title: { display: true, text: 'Radius (y)', color: '#64748b' } }
+                },
+                plugins: { legend: { labels: { color: '#f1f5f9', font: { size: 10 } } } }
+            }
+        });
+    }
+    
+    calculate();
+</script>
+
+</body>
+</html>
